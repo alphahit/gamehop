@@ -53,10 +53,11 @@ export const SplashScreen = () => {
   // },[])
   useEffect(() => {
     setTimeout(() => {
-      navigation.navigate('Home');
+      navigation.navigate('Login');
     }, 1000);
   }, [navigation]);
 
+  //Root Checker And Emulator Checker
   // useEffect(() => {
   //   console.log(
   //     'DeviceInfo.isEmulator()===============>',

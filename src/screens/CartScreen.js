@@ -12,6 +12,7 @@ import {
   FlatList,
   Image,
   Pressable,
+  Alert,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -24,6 +25,7 @@ import {
   addMyProductToCart,
   removeMyProductFromCart,
 } from '../../store/slices/MyCartSlice';
+import RazorpayCheckout from 'react-native-razorpay';
 import Animated, {
   FadeIn,
   FadeOut,
@@ -46,6 +48,41 @@ const CartScreen = () => {
   const dispatch = useDispatch();
   const myCartItems = useSelector(state => state.cart);
   const [isOpen, setOpen] = useState(false);
+  const [street, setStreet] = useState('Plot No - 1328');
+  const [adrress, setAdrress] = useState('Mahanadivihar');
+  const [pincode, setPincode] = useState('753004');
+  const [mobile, setMobile] = useState('+917894084633');
+  const [addresses, setAddresses] = useState([
+    {
+      id: 1,
+      street: 'Plot No - 1328',
+      address: 'Mahanadivihar',
+      pincode: '753004',
+      mobile: '+917894084633',
+    },
+    {
+      id: 2,
+      street: 'Plot No - 452',
+      address: 'Laxmisagar',
+      pincode: '753005',
+      mobile: '+917894084634',
+    },
+    {
+      id: 3,
+      street: 'Plot No - 789',
+      address: 'Bidanasi',
+      pincode: '753006',
+      mobile: '+917894084635',
+    },
+    {
+      id: 4,
+      street: 'Plot No - 201',
+      address: 'CDA Sector 7',
+      pincode: '753014',
+      mobile: '+917894084636',
+    },
+  ]);
+
   const handleRemoveFromCart = item => dispatch(removeMyProductFromCart(item));
   const handleAddToCart = item => dispatch(addMyProductToCart(item));
   const toggleSheet = () => {
@@ -93,12 +130,21 @@ const CartScreen = () => {
     <GestureHandlerRootView style={styles.container}>
       <Header navigation={navigation} />
       <CartItemsList myCartItems={myCartItems} renderItem={renderItem} />
-      <SelectAddress toggleSheet={toggleSheet} />
+      <SelectAddress
+        toggleSheet={toggleSheet}
+        street={street}
+        adrress={adrress}
+        pincode={pincode}
+        mobile={mobile}
+      />
       <CartSummary
         cartTotal={cartTotal}
         gst={gst}
         orderTotal={orderTotal}
         navigation={navigation}
+        street={street}
+        mobile={mobile}
+        pincode={pincode}
       />
       {isOpen && (
         <>
@@ -113,7 +159,7 @@ const CartScreen = () => {
               style={[styles.sheet, translateY]}
               entering={SlideInDown.springify().damping(15)}
               exiting={SlideOutDown}>
-              <View
+              {/* <View
                 style={{
                   paddingHorizontal: 5,
                   alignItems: 'center',
@@ -146,7 +192,51 @@ const CartScreen = () => {
                   }}>
                   <Text style={{color: 'white', fontSize: 12}}>Select</Text>
                 </TouchableOpacity>
-              </View>
+              </View> */}
+              <FlatList
+                data={addresses}
+                keyExtractor={item => item.id.toString()}
+                renderItem={({item}) => (
+                  <View
+                    style={{
+                      paddingHorizontal: 5,
+                      alignItems: 'center',
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      backgroundColor: 'white',
+                      height: 40,
+                      alignSelf: 'center',
+                      width: '98%',
+                      marginBottom: 5,
+                      borderColor: 'rgba(173, 64, 175, 0.2 )',
+                      borderBottomWidth: 1,
+                    }}>
+                    <View style={{width: '80%'}}>
+                      <Text style={{color: 'black', fontSize: 12}}>
+                        {`${item.street}, ${item.address}, ${item.pincode}`}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        toggleSheet();
+                        setStreet(item.street);
+                        setAdrress(item.address);
+                        setPincode(item.pincode);
+                        setMobile(item.mobile);
+                      }}
+                      style={{
+                        width: '20%',
+                        backgroundColor: '#AD40AF',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        paddingVertical: 2,
+                        borderRadius: 5,
+                      }}>
+                      <Text style={{color: 'white', fontSize: 12}}>Select</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              />
             </Animated.View>
           </GestureDetector>
         </>
@@ -156,12 +246,13 @@ const CartScreen = () => {
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-const SelectAddress = ({toggleSheet}) => (
+const SelectAddress = ({toggleSheet, street, adrress, pincode, mobile}) => (
   <View style={[styles.addressButton, {paddingHorizontal: 5}]}>
     <View style={{width: '80%'}}>
       <Text style={{color: 'black', fontSize: 12}}>
-        Plot No - 1328, Mahandivihar, Cuttack
+        {street}, {adrress}, {pincode}
       </Text>
+      <Text style={{color: 'black', fontSize: 12}}>{mobile}</Text>
     </View>
     <TouchableOpacity
       onPress={() => {
@@ -220,7 +311,7 @@ const CartItemsList = ({myCartItems, renderItem}) =>
     </View>
   );
 
-const CartSummary = ({cartTotal, gst, orderTotal, navigation}) => (
+const CartSummary = ({cartTotal, gst, orderTotal, navigation, mobile, pincode, street}) => (
   <View style={styles.cartSummary}>
     <SummaryRow label="Subtotal" value={`₹${cartTotal}`} />
     <SummaryRow label="GST" value={`₹${gst}`} />
@@ -228,7 +319,37 @@ const CartSummary = ({cartTotal, gst, orderTotal, navigation}) => (
     <TouchableOpacity
       style={styles.placeOrderButton}
       disabled={cartTotal === 0}
-      onPress={() => navigation.navigate('OrderAnimation')}>
+      // onPress={() => navigation.navigate('OrderAnimation')}
+      onPress={() => {
+        var options = {
+          description: 'Demo Purchase of Game',
+          image: require('../assets/images/gamehop.png'),
+          currency: 'INR',
+          key: 'rzp_test_g9NsAuKO5joYFd',
+          amount: (orderTotal * 100).toString(),
+          name: 'Gamehop',
+          order_id: '',
+          prefill: {
+            email: 'alpha.codes@example.com',
+            contact: mobile,
+            name: 'Alpha Codes',
+          },
+          theme: {color: '#FFFED7'},
+        };
+        RazorpayCheckout.open(options)
+          .then(data => {
+            // handle success
+            // Alert.alert(`Success: ${data.razorpay_payment_id}`);
+            console.log(`Success: ${data.razorpay_payment_id}`);
+            navigation.navigate('OrderAnimation')
+          })
+          .catch(error => {
+            // handle failure
+            // Alert.alert(`Error: ${error.code} | ${error.description}`);
+            console.error(`Error: ${error.code} | ${error.description}`);
+          });
+      }}>
+        {console.log(`orderTotal===>${orderTotal*100}`,orderTotal)}
       <Text style={styles.placeOrderText}>
         {cartTotal > 0 ? 'Place Order' : 'No Items'}
       </Text>

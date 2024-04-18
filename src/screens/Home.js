@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useEffect, useState, useLayoutEffect} from 'react';
+import React, {useEffect, useState, useLayoutEffect, useCallback} from 'react';
 import {
   ImageBackground,
   SafeAreaView,
@@ -18,11 +18,11 @@ import {
   Keyboard,
 } from 'react-native';
 
-import Carousel from 'react-native-snap-carousel';
 import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 import BannerSlider from '../components/BannerSlider';
+import Carousel from 'pinar';
 
 import {freeGames, paidGames, sliderData} from '../model/data';
 import CustomSwitch from '../components/CustomSwitch';
@@ -70,7 +70,7 @@ const Home = ({navigation}) => {
 
   useEffect(() => {
     setsearchResultGame(filteredGamesFunction());
-  }, [term]);
+  }, [filteredGamesFunction, term]);
 
   useEffect(() => {
     const disableBackButton = () => {
@@ -89,11 +89,14 @@ const Home = ({navigation}) => {
     setTerm('');
   };
 
-  const filteredGamesFunction = () =>
-    myProducts.filter(({title}) => {
-      console.log('name.includes(term)=======>', title.indexOf(term));
-      return title.indexOf(term) >= 0;
-    });
+  const filteredGamesFunction = useCallback(
+    () =>
+      myProducts.filter(({title}) => {
+        console.log('name.includes(term)=======>', title.indexOf(term));
+        return title.indexOf(term) >= 0;
+      }),
+    [],
+  );
 
   const renderItem = ({item, index}) => {
     console.log('render item ================>', item);
@@ -139,7 +142,7 @@ const Home = ({navigation}) => {
               }}>
               {item.title}
             </Text>
-            {gamesTab == 1 ? (
+            {gamesTab === 1 ? (
               <Text
                 numberOfLines={1}
                 style={{
@@ -161,7 +164,7 @@ const Home = ({navigation}) => {
             width: 100,
             borderRadius: 10,
           }}
-          disabled={gamesTab == 2}
+          disabled={gamesTab === 2}
           onPress={() => {
             setBottomCart(true);
             dispatch(addMyProductToCart(item));
@@ -197,8 +200,8 @@ const Home = ({navigation}) => {
               textAlign: 'center',
               fontSize: 14,
             }}>
-            {item.isFree == 'Yes' && 'PLAY'}
-            {item.isFree == 'No' && 'ADD'}
+            {item.isFree === 'Yes' && 'PLAY'}
+            {item.isFree === 'No' && 'ADD'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -262,16 +265,26 @@ const Home = ({navigation}) => {
         </View>
         <View style={styles.v3}>
           <Text style={styles.t2}>Upcoming Games</Text>
+          <TouchableOpacity
+            style={styles.seeAllButton}
+            onPress={() => {
+              navigation.navigate('Upcoming');
+            }}>
+            <Text style={styles.seeAllText}>See All</Text>
+          </TouchableOpacity>
         </View>
-        <View style={{marginBottom: 20}}>
-          <Carousel
-            data={sliderData}
-            renderItem={renderBanner}
-            sliderWidth={windowWidth - 40}
-            itemWidth={300}
-            loop={true}
-          />
+            <View style={{height:hp(25), marginBottom:15}}>
+        <Carousel
+        loop={true}
+        autoplay={true}
+        showsControls={false}
+        style={styles.carousel}>
+          {sliderData.map(img => (
+            <Image style={styles.image} source={img.image} key={img.title} />
+          ))}
+        </Carousel>
         </View>
+
         <View style={{width: wp(90), alignSelf: 'center', marginBottom: 20}}>
           <CustomSwitch
             selectionMode={1}
@@ -301,8 +314,8 @@ const Home = ({navigation}) => {
           }}
         />
 
-        {gamesTab == 1 &&
-          bottomCart == true &&
+        {gamesTab === 1 &&
+          bottomCart === true &&
           myCartItems.length > 0 &&
           myCartItems.some(check => check.qty > 0) && (
             <View
@@ -326,23 +339,18 @@ const Home = ({navigation}) => {
                 </Text>
                 <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
                   ₹
-                  {
-                    myCartItems.reduce((accumulator, item) => {
-                      // Convert the price from string to number and add it to the accumulator
-                      return (
-                        accumulator + parseInt(item.price) * parseInt(item.qty)
-                      );
-                    }, 0)
-                    // Initialize accumulator with 0
-                  }
+                  {myCartItems.reduce((accumulator, item) => {
+                    return (
+                      accumulator + parseInt(item.price) * parseInt(item.qty)
+                    );
+                  }, 0)}
                 </Text>
               </View>
               <TouchableOpacity
                 style={{
                   height: 60,
-                  backgroundColor: 'yellow',
+
                   flexDirection: 'row',
-                  height: 40,
                   width: 80,
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -351,7 +359,9 @@ const Home = ({navigation}) => {
                 onPress={() => {
                   navigation.navigate('Cart');
                 }}>
-                <Text style={{color: 'black'}}>View Cart</Text>
+                <Text style={{fontColor: '#fff', fontWeight: 'bold'}}>
+                  View Cart
+                </Text>
               </TouchableOpacity>
             </View>
           )}
@@ -389,12 +399,29 @@ const styles = StyleSheet.create({
   v3: {
     marginVertical: 15,
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
   t2: {fontSize: 18, fontWeight: '500', color: '#AD40AF'},
+  seeAllButton: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 50,
+    borderWidth: 1,
+    borderColor: '#AD40AF',
+  },
+  seeAllText: {
+    color: '#AD40AF',
+    fontWeight: 'bold',
+  },
+  carousel: {
+    height:'100%',
+    width:'100%',
+  },
+  image:{
+    height:'100%',
+    width:'100%',
+    borderRadius: 10,
+  }
 });
-//ScrollView renders all its react child components at once,
-//but this has a performance downside.
-//FlatList renders items lazily, when they are about to appear, and removes items that
-//scroll way off screen to save memory and processing time.

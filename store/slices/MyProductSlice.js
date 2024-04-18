@@ -1,7 +1,6 @@
-// Import the createSlice API from Redux Toolkit
+
 import {createSlice} from '@reduxjs/toolkit';
 
-// This is the initial state of the slice
 const initialState = [];
 
 export const MyProductSlice = createSlice({

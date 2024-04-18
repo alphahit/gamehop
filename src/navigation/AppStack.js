@@ -13,6 +13,8 @@ import CartScreen from '../screens/CartScreen';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {SplashScreen} from '../screens/SplashScreen';
 import OrderAnimation from '../screens/OrderAnimation';
+import UpcomingGames from '../screens/UpcomingGames';
+import LoginScreen from '../screens/LoginScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -23,7 +25,9 @@ function SplashStack() {
         headerShown: false,
       }}>
       <Stack.Screen name="Splash" component={SplashScreen} />
+      <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="Upcoming" component={UpcomingGames} />
       <Stack.Screen
         component={CartScreen}
         name="Cart"
