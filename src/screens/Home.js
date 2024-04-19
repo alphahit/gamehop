@@ -273,16 +273,16 @@ const Home = ({navigation}) => {
             <Text style={styles.seeAllText}>See All</Text>
           </TouchableOpacity>
         </View>
-            <View style={{height:hp(25), marginBottom:15}}>
-        <Carousel
-        loop={true}
-        autoplay={true}
-        showsControls={false}
-        style={styles.carousel}>
-          {sliderData.map(img => (
-            <Image style={styles.image} source={img.image} key={img.title} />
-          ))}
-        </Carousel>
+        <View style={{height: hp(25), marginBottom: 15}}>
+          <Carousel
+            loop={true}
+            autoplay={true}
+            showsControls={false}
+            style={styles.carousel}>
+            {sliderData.map(img => (
+              <Image style={styles.image} source={img.image} key={img.title} />
+            ))}
+          </Carousel>
         </View>
 
         <View style={{width: wp(90), alignSelf: 'center', marginBottom: 20}}>
@@ -416,12 +416,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   carousel: {
-    height:'100%',
-    width:'100%',
+    height: '100%',
+    width: '100%',
   },
-  image:{
-    height:'100%',
-    width:'100%',
+  image: {
+    height: '100%',
+    width: '100%',
     borderRadius: 10,
-  }
+  },
 });
