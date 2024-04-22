@@ -323,7 +323,8 @@ const CartSummary = ({cartTotal, gst, orderTotal, navigation, mobile, pincode, s
       onPress={() => {
         var options = {
           description: 'Demo Purchase of Game',
-          image: require('../assets/images/gamehop.png'),
+          //image: require('../assets/images/gamehop.png'),
+          image: 'https://w7.pngwing.com/pngs/121/302/png-transparent-google-play-games-android-play-games-game-video-game-grass-thumbnail.png',
           currency: 'INR',
           key: 'rzp_test_g9NsAuKO5joYFd',
           amount: (orderTotal * 100).toString(),

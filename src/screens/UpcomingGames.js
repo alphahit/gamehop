@@ -1,10 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable prettier/prettier */
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   View, Text, FlatList, StyleSheet, ImageBackground, TouchableOpacity,
   SafeAreaView, ActivityIndicator, Animated,
-  Image
+  Image,
+  TextInput,
+  Keyboard
 } from 'react-native';
 import { getGamesList } from '../api';
 import {
@@ -12,7 +14,8 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import { useNavigation } from '@react-navigation/native';
-
+import Feather from 'react-native-vector-icons/Feather';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 export default function UpcomingGames() {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +23,11 @@ export default function UpcomingGames() {
   const navigation = useNavigation();
   const opacityValues = useRef(new Map()).current; // Map to store animated values
   const textOpacityValues = useRef(new Map()).current; // Map to store animated values for text containers
-
+  const [term, setTerm] = useState('');
+  const handleSearchclose = () => {
+    Keyboard.dismiss();
+    setTerm('');
+  };
 
   const viewabilityConfig = {
     itemVisiblePercentThreshold: 50
@@ -72,6 +79,17 @@ export default function UpcomingGames() {
 
     fetchGames();
   }, []);
+  // const filteredGamesFunction = useCallback(
+  //   () =>
+  //     myProducts.filter(({title}) => {
+  //       console.log('name.includes(term)=======>', title.indexOf(term));
+  //       return title.indexOf(term) >= 0;
+  //     }),
+  //   [],
+  // );
+  // useEffect(() => {
+  //   setsearchResultGame(filteredGamesFunction());
+  // }, [filteredGamesFunction]);
 
   const renderItem = ({ item }) => {
     const opacity = opacityValues.get(item.id) || new Animated.Value(0.2);
@@ -102,6 +120,48 @@ export default function UpcomingGames() {
           <ActivityIndicator size="large" color="#00ff00" />
         </View>
       )}
+      {!loading &&
+      
+      <View style={styles.v2}>
+          <TouchableOpacity
+            onPress={() => {
+              term.length > 0 && handleSearchclose();
+            }}>
+            {term.length > 0 ? (
+              <AntDesign
+                name="close"
+                size={25}
+                color="#AD40AF"
+                style={{marginLeft: 5}}
+              />
+            ) : (
+              <Feather
+                name="search"
+                size={25}
+                color="#AD40AF"
+                style={{marginLeft: 5}}
+              />
+            )}
+          </TouchableOpacity>
+          <TextInput
+            style={{
+              fontSize: 16,
+              backgroundColor: 'white',
+              flex: 1,
+              borderRadius: 8,
+              textAlign: 'left',
+              color: 'black',
+            }}
+            placeholder="Search"
+            placeholderTextColor={'lightgrey'}
+            onChangeText={text => setTerm(text)}
+            value={term}
+            //onPressIn={() => setActivateSearch(true)}
+            onSubmitEditing={Keyboard.dismiss}
+          />
+        </View>
+      }
+      
       <FlatList
         data={games}
         keyExtractor={item => item.id.toString()}
@@ -134,18 +194,24 @@ const styles = StyleSheet.create({
   textContainer: {
     flex: 1,
     padding: 10,
+    alignSelf:'flex-end',
+    justifyContent:'flex-end'
     //backgroundColor: 'rgba(255, 0, 0, 0.2)',
   },
   title: {
     fontSize: 16,
     fontWeight: 'bold',
     color: 'black',
-    backgroundColor: 'rgba(255, 0, 0, 0.2)',
+    backgroundColor: 'rgba(252, 241, 255 , 0.5)',
+    paddingHorizontal:2,
+    paddingTop:2
   },
   subtitle: {
     fontSize: 14,
-    color: 'grey',
-    backgroundColor: 'rgba(255, 0, 0, 0.2)',
+    color: 'black',
+    backgroundColor: 'rgba(252, 241, 255 , 0.5)',
+    paddingHorizontal:2,
+    paddingBottom:2
   },
   backIcon: {
     height: 40,
@@ -175,5 +241,15 @@ const styles = StyleSheet.create({
     flex: 1,
     height: hp(25),
     justifyContent: 'center',
+  },
+  v2: {
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    borderWidth: 2,
+    borderColor: '#AD40AF',
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 20,
+    marginHorizontal: 20,
   },
 });

@@ -10,15 +10,17 @@ import {
   Image,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation();
   return (
     <SafeAreaView style={{flex: 1}}>
       <View style={styles.container}>
         <Image
-          style={{height: 200, width: 400}}
+          style={{height: 150, width: 300}}
           resizeMode="contain"
           source={require('../assets/images/gamehop.png')}
         />
@@ -32,14 +34,48 @@ const LoginScreen = () => {
           autoCapitalize="none"
           placeholderTextColor="#AD40AF"
         />
-        <TextInput
-          style={styles.input}
-          onChangeText={setPassword}
-          value={password}
-          placeholder="Enter your password"
-          secureTextEntry
-          placeholderTextColor="#AD40AF"
-        />
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            height: 50,
+            width: '90%',
+            borderRadius: 10,
+            margin: 12,
+            borderWidth: 1,
+            paddingHorizontal: 10,
+            borderColor: '#AD40AF',
+            padding: 0,
+            color: 'black',
+            backgroundColor: '#fcf1ff',
+          }}>
+          <TextInput
+            style={{
+              height: '100%',
+              width: '90%',
+              borderRadius: 10,
+              borderColor: '#AD40AF',
+              color: 'black',
+              backgroundColor: '#fcf1ff',
+              margin: 0,
+            }}
+            onChangeText={setPassword}
+            value={password}
+            placeholder="Enter your password"
+            secureTextEntry={!showPassword}
+            placeholderTextColor="#AD40AF"
+          />
+          <TouchableOpacity style={{width: '10%'}}>
+            <AntDesign
+              onPress={() => setShowPassword(!showPassword)}
+              name="eye"
+              size={25}
+              color="#AD40AF"
+              style={{marginLeft: 5}}
+            />
+          </TouchableOpacity>
+        </View>
+
         <TouchableOpacity
           onPress={() => {
             navigation.navigate('Home');

@@ -18,9 +18,6 @@ import {
   Keyboard,
 } from 'react-native';
 
-import Feather from 'react-native-vector-icons/Feather';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-
 import BannerSlider from '../components/BannerSlider';
 import Carousel from 'pinar';
 
@@ -44,7 +41,7 @@ const Home = ({navigation}) => {
   const [plusMinus, setPlusMinus] = useState('');
   const [searchResultGame, setsearchResultGame] = useState([]);
   const [activateSearch, setActivateSearch] = useState(false);
-  const [term, setTerm] = useState('');
+
   const dispatch = useDispatch();
 
   const myProducts = useSelector(state => state.product);
@@ -69,10 +66,6 @@ const Home = ({navigation}) => {
   };
 
   useEffect(() => {
-    setsearchResultGame(filteredGamesFunction());
-  }, [filteredGamesFunction, term]);
-
-  useEffect(() => {
     const disableBackButton = () => {
       return true;
     };
@@ -83,20 +76,6 @@ const Home = ({navigation}) => {
       BackHandler.removeEventListener('hardwareBackPress', disableBackButton);
     };
   }, []);
-
-  const handleSearchclose = () => {
-    Keyboard.dismiss();
-    setTerm('');
-  };
-
-  const filteredGamesFunction = useCallback(
-    () =>
-      myProducts.filter(({title}) => {
-        console.log('name.includes(term)=======>', title.indexOf(term));
-        return title.indexOf(term) >= 0;
-      }),
-    [],
-  );
 
   const renderItem = ({item, index}) => {
     console.log('render item ================>', item);
@@ -214,57 +193,26 @@ const Home = ({navigation}) => {
         flex: 1,
         backgroundColor: '#FFFED7',
       }}>
-      <View style={{flex: 1, paddingTop: 20, paddingHorizontal: 20}}>
-        <View style={styles.v1}>
-          <Text style={styles.t1}>Hello Alpha</Text>
-          <View>
-            <ImageBackground
-              source={require('../assets/images/user-profile.jpg')}
-              style={{width: 35, height: 35}}
-              imageStyle={{borderRadius: 25}}
-            />
-          </View>
-        </View>
-        <View style={styles.v2}>
-          <TouchableOpacity
-            onPress={() => {
-              term.length > 0 && handleSearchclose();
-            }}>
-            {term.length > 0 ? (
-              <AntDesign
-                name="close"
-                size={25}
-                color="#AD40AF"
-                style={{marginLeft: 5}}
-              />
-            ) : (
-              <Feather
-                name="search"
-                size={25}
-                color="#AD40AF"
-                style={{marginLeft: 5}}
-              />
-            )}
-          </TouchableOpacity>
-          <TextInput
-            style={{
-              fontSize: 16,
-              backgroundColor: 'white',
-              flex: 1,
-              borderRadius: 8,
-              textAlign: 'left',
-              color: 'black',
-            }}
-            placeholder="Search"
-            placeholderTextColor={'lightgrey'}
-            onChangeText={text => setTerm(text)}
-            value={term}
-            //onPressIn={() => setActivateSearch(true)}
-            onSubmitEditing={Keyboard.dismiss}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Image
+            source={require('../assets/images/user-profile.jpg')}
+            style={styles.backIcon}
           />
-        </View>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Hello Alpha</Text>
+      </View>
+
+      <View
+        style={{
+          height: hp(25),
+          marginBottom: 15,
+          paddingHorizontal: 20,
+          justifyContent: 'center',
+          marginTop: 15,
+        }}>
         <View style={styles.v3}>
-          <Text style={styles.t2}>Upcoming Games</Text>
+          <Text style={styles.t2}></Text>
           <TouchableOpacity
             style={styles.seeAllButton}
             onPress={() => {
@@ -273,99 +221,97 @@ const Home = ({navigation}) => {
             <Text style={styles.seeAllText}>See All</Text>
           </TouchableOpacity>
         </View>
-        <View style={{height: hp(25), marginBottom: 15}}>
-          <Carousel
-            loop={true}
-            autoplay={true}
-            showsControls={false}
-            style={styles.carousel}>
-            {sliderData.map(img => (
-              <Image style={styles.image} source={img.image} key={img.title} />
-            ))}
-          </Carousel>
-        </View>
-
-        <View style={{width: wp(90), alignSelf: 'center', marginBottom: 20}}>
-          <CustomSwitch
-            selectionMode={1}
-            option1="Paid Games"
-            option2="Free To Play"
-            onSelectSwitch={onSelectSwitch}
-          />
-        </View>
-
-        <FlatList
-          //data={gamesTab == 1 ? myProducts : freeGames}
-          data={
-            gamesTab == 1 && searchResultGame.length == 0
-              ? myProducts
-              : searchResultGame.length > 0 && gamesTab == 1
-              ? searchResultGame
-              : freeGames
-          }
-          keyExtractor={item => item.id}
-          renderItem={renderItem}
-          showsVerticalScrollIndicator={false}
-          style={{
-            width: wp(90),
-            alignSelf: 'center',
-            height: hp(40),
-            marginBottom: myCartItems.length > 0 ? 80 : 0,
-          }}
-        />
-
-        {gamesTab === 1 &&
-          bottomCart === true &&
-          myCartItems.length > 0 &&
-          myCartItems.some(check => check.qty > 0) && (
-            <View
-              style={{
-                position: 'absolute',
-                width: wp(90),
-                borderRadius: 10,
-                bottom: 10,
-                height: 55,
-                backgroundColor: '#AD40AF',
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                paddingHorizontal: 10,
-                alignItems: 'center',
-                alignSelf: 'center',
-                zIndex: 9999,
-              }}>
-              <View>
-                <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
-                  Items Added ({myCartItems.length})
-                </Text>
-                <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
-                  ₹
-                  {myCartItems.reduce((accumulator, item) => {
-                    return (
-                      accumulator + parseInt(item.price) * parseInt(item.qty)
-                    );
-                  }, 0)}
-                </Text>
-              </View>
-              <TouchableOpacity
-                style={{
-                  height: 60,
-
-                  flexDirection: 'row',
-                  width: 80,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: 10,
-                }}
-                onPress={() => {
-                  navigation.navigate('Cart');
-                }}>
-                <Text style={{fontColor: '#fff', fontWeight: 'bold'}}>
-                  View Cart
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
+        <Carousel
+          loop={true}
+          autoplay={true}
+          showsControls={false}
+          style={styles.carousel}>
+          {sliderData.map(img => (
+            <Image style={styles.image} source={img.image} key={img.title} />
+          ))}
+        </Carousel>
       </View>
+
+      <View style={{width: wp(90), alignSelf: 'center', marginBottom: 20}}>
+        <CustomSwitch
+          selectionMode={1}
+          option1="Paid Games"
+          option2="Free To Play"
+          onSelectSwitch={onSelectSwitch}
+        />
+      </View>
+
+      <FlatList
+        //data={gamesTab == 1 ? myProducts : freeGames}
+        data={
+          gamesTab === 1 && searchResultGame.length === 0
+            ? myProducts
+            : searchResultGame.length > 0 && gamesTab === 1
+            ? searchResultGame
+            : freeGames
+        }
+        keyExtractor={item => item.id}
+        renderItem={renderItem}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{paddingBottom: myCartItems.length > 0 ? 80 : 0}}
+        style={{
+          width: wp(90),
+          alignSelf: 'center',
+          height: hp(40),
+        }}
+      />
+
+      {gamesTab === 1 &&
+        bottomCart === true &&
+        myCartItems.length > 0 &&
+        myCartItems.some(check => check.qty > 0) && (
+          <View
+            style={{
+              position: 'absolute',
+              width: wp(90),
+              borderRadius: 10,
+              bottom: 10,
+              height: 55,
+              backgroundColor: '#AD40AF',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              paddingHorizontal: 10,
+              alignItems: 'center',
+              alignSelf: 'center',
+              zIndex: 9999,
+            }}>
+            <View>
+              <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
+                Items Added ({myCartItems.length})
+              </Text>
+              <Text style={{color: 'white', fontWeight: '500', fontSize: 14}}>
+                ₹
+                {myCartItems.reduce((accumulator, item) => {
+                  return (
+                    accumulator + parseInt(item.price) * parseInt(item.qty)
+                  );
+                }, 0)}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={{
+                height: 60,
+
+                flexDirection: 'row',
+                width: 80,
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 10,
+              }}
+              onPress={() => {
+                navigation.navigate('Cart');
+              }}>
+              <Text style={{fontColor: '#fff', fontWeight: 'bold'}}>
+                View Cart
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
     </SafeAreaView>
   );
 };
@@ -397,17 +343,22 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   v3: {
-    marginVertical: 15,
+    position: 'absolute',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignSelf: 'center',
     alignItems: 'center',
+    top: 5,
+    paddingRight: 5,
+    width: '100%',
+    zIndex: 1000,
   },
   t2: {fontSize: 18, fontWeight: '500', color: '#AD40AF'},
   seeAllButton: {
     backgroundColor: '#fff',
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 50,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#AD40AF',
   },
@@ -423,5 +374,30 @@ const styles = StyleSheet.create({
     height: '100%',
     width: '100%',
     borderRadius: 10,
+  },
+  header: {
+    backgroundColor: '#fcf1ff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: hp(7),
+    width: wp(100),
+    borderBottomEndRadius: 10,
+    borderBottomLeftRadius: 10,
+    borderBottomWidth: 1,
+    borderRightWidth: 1,
+    borderLeftWidth: 1,
+    borderColor: '#AD40AF',
+    paddingHorizontal: 10,
+  },
+  headerTitle: {
+    color: 'black',
+    fontSize: 20,
+    fontWeight: '500',
+    paddingLeft: 10,
+  },
+  backIcon: {
+    height: 40,
+    width: 40,
+    borderRadius: 100,
   },
 });
