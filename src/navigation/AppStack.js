@@ -15,6 +15,7 @@ import {SplashScreen} from '../screens/SplashScreen';
 import OrderAnimation from '../screens/OrderAnimation';
 import UpcomingGames from '../screens/UpcomingGames';
 import LoginScreen from '../screens/LoginScreen';
+import GameDetails from '../screens/GameDetails';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +29,7 @@ function SplashStack() {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Home" component={Home} />
       <Stack.Screen name="Upcoming" component={UpcomingGames} />
+      <Stack.Screen name="GameDetails" component={GameDetails} />
       <Stack.Screen
         component={CartScreen}
         name="Cart"

@@ -21,7 +21,7 @@ export default function UpcomingGames() {
   const [loading, setLoading] = useState(true);
   const focusedItemIds = useRef(new Set()).current; // Use useRef to persist focused IDs across renders
   const navigation = useNavigation();
-  const opacityValues = useRef(new Map()).current; // Map to store animated values
+  const scaleValues = useRef(new Map()).current; // Map to store animated values
   const textOpacityValues = useRef(new Map()).current; // Map to store animated values for text containers
   const [term, setTerm] = useState('');
   const handleSearchclose = () => {
@@ -30,23 +30,24 @@ export default function UpcomingGames() {
   };
 
   const viewabilityConfig = {
-    itemVisiblePercentThreshold: 50
+    itemVisiblePercentThreshold: 70
   };
 
+useEffect(()=>{},[])
   const onViewableItemsChanged = ({ viewableItems }) => {
     const newFocusedIds = new Set(viewableItems.slice(0, 3).map(item => item.item.id));
     games.forEach(game => {
       const isFocused = newFocusedIds.has(game.id);
-      if (!opacityValues.has(game.id)) {
-        opacityValues.set(game.id, new Animated.Value(0.5));
+      if (!scaleValues.has(game.id)) {
+        scaleValues.set(game.id, new Animated.Value(1));
       }
       if (!textOpacityValues.has(game.id)) {
         textOpacityValues.set(game.id, new Animated.Value(0)); // Initialize with 0 for text
       }
 
       // Update item container opacity
-      Animated.timing(opacityValues.get(game.id), {
-        toValue: isFocused ? 1 : 0.5,
+      Animated.timing(scaleValues.get(game.id), {
+        toValue: isFocused ? 1.1 : 1,
         duration: 500,
         useNativeDriver: true
       }).start();
@@ -54,7 +55,7 @@ export default function UpcomingGames() {
       // Update text container opacity
       Animated.timing(textOpacityValues.get(game.id), {
         toValue: isFocused ? 1 : 0,
-        duration: 500,
+        duration: 800,
         useNativeDriver: true
       }).start();
     });
@@ -66,12 +67,12 @@ export default function UpcomingGames() {
   useEffect(() => {
     const fetchGames = async () => {
       const data = await getGamesList();
-      // console.log("data====>",JSON.stringify(data) )
+      // console.log("data====>",JSON.stringify(data.slice(0,3)) )
       if (data.length > 0) {
         setLoading(false);
         setGames(data);
         data.forEach(game => {
-          opacityValues.set(game.id, new Animated.Value(0.2));
+          scaleValues.set(game.id, new Animated.Value(1));
           textOpacityValues.set(game.id, new Animated.Value(0));
         });
       }
@@ -90,20 +91,30 @@ export default function UpcomingGames() {
   // useEffect(() => {
   //   setsearchResultGame(filteredGamesFunction());
   // }, [filteredGamesFunction]);
+  const filteredGames = games.filter((game, index, xyz) => {
+     const name = game.name.toLowerCase();
+    return name.includes(term.toLowerCase());
+  });
 
   const renderItem = ({ item }) => {
-    const opacity = opacityValues.get(item.id) || new Animated.Value(0.2);
+    const scale = scaleValues.get(item.id) || new Animated.Value(1);
     const textOpacity = textOpacityValues.get(item.id) || new Animated.Value(0);
 
     return (
-      <Animated.View style={[styles.itemContainer, { opacity }]}>
+      <TouchableOpacity style={{marginBottom:10}} onPress={() => navigation.navigate('GameDetails', {  item })}>
+      <Animated.View style={[styles.itemContainer, { transform: [{ scale }] }]}>
+        
         <ImageBackground source={{ uri: item.background_image }} resizeMode="cover" style={styles.image}>
+       
         <Animated.View style={[styles.textContainer, { opacity: textOpacity }]}>
             <Text style={[styles.title,{borderTopRightRadius: 5, borderTopLeftRadius: 5, paddingTop:2, paddingLeft:2}]}>{item.name}</Text>
             <Text style={[styles.subtitle,{borderBottomRightRadius: 5, borderBottomLeftRadius: 5,paddingBottom:2, paddingLeft:2}]}>Released: {item.released}</Text>
           </Animated.View>
+      
         </ImageBackground>
+      
       </Animated.View>
+      </TouchableOpacity>
     );
   };
 
@@ -163,7 +174,7 @@ export default function UpcomingGames() {
       }
       
       <FlatList
-        data={games}
+        data={filteredGames}
         keyExtractor={item => item.id.toString()}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
